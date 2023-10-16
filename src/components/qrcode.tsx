@@ -6,15 +6,15 @@ interface Props {
   options?: Accessor<QRCodeRenderersOptions>;
 }
 
-function downloadCanvasAsImage(canvas: HTMLCanvasElement) {
-  let downloadLink = document.createElement("a");
-  downloadLink.setAttribute("download", "QRCode.png");
-  canvas.toBlob((blob) => {
-    let url = URL.createObjectURL(blob!);
-    downloadLink.setAttribute("href", url);
-    downloadLink.click();
-  }, "image/png");
-}
+const defaultQrOptions: QRCodeRenderersOptions = {
+  width: 512,
+  errorCorrectionLevel: "medium",
+  margin: 1,
+  color: {
+    // light: "#",
+    // dark: "#0000ff",
+  },
+};
 
 function QrCode({ content, options }: Props) {
   let canvas!: HTMLCanvasElement;
@@ -22,20 +22,31 @@ function QrCode({ content, options }: Props) {
   createEffect(async () => {
     if (content()) {
       await QRCode.toCanvas(canvas, content(), {
-        width: 512,
-        errorCorrectionLevel: "medium",
-        margin: 1,
-        color: {
-          // light: "#",
-          // dark: "#0000ff",
-        },
+        ...defaultQrOptions,
         ...(options?.() ?? {}),
       });
     } else {
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
       context?.clearRect(0, 0, canvas.width, canvas.height);
     }
   });
+
+  async function downloadCanvasAsImage(canvas: HTMLCanvasElement) {
+    let canvas2 = document.createElement("canvas");
+    await QRCode.toCanvas(canvas2, content(), {
+      ...defaultQrOptions,
+      ...(options?.() ?? {}),
+      width: 1024,
+    });
+
+    let downloadLink = document.createElement("a");
+    downloadLink.setAttribute("download", "QRCode.png");
+    canvas2.toBlob((blob) => {
+      let url = URL.createObjectURL(blob!);
+      downloadLink.setAttribute("href", url);
+      downloadLink.click();
+    }, "image/png");
+  }
 
   return (
     <div>
