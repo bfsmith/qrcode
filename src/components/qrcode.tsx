@@ -31,9 +31,9 @@ function QrCode({ content, options }: Props) {
     }
   });
 
-  async function downloadCanvasAsImage(canvas: HTMLCanvasElement) {
-    let canvas2 = document.createElement("canvas");
-    await QRCode.toCanvas(canvas2, content(), {
+  async function downloadAsImage() {
+    let canvas = document.createElement("canvas");
+    await QRCode.toCanvas(canvas, content(), {
       ...defaultQrOptions,
       ...(options?.() ?? {}),
       width: 1024,
@@ -41,7 +41,7 @@ function QrCode({ content, options }: Props) {
 
     let downloadLink = document.createElement("a");
     downloadLink.setAttribute("download", "QRCode.png");
-    canvas2.toBlob((blob) => {
+    canvas.toBlob((blob) => {
       let url = URL.createObjectURL(blob!);
       downloadLink.setAttribute("href", url);
       downloadLink.click();
@@ -55,7 +55,7 @@ function QrCode({ content, options }: Props) {
         <div class="flex justify-center">
           <div
             class="btn btn-wide btn-primary cursor-pointer"
-            onClick={() => downloadCanvasAsImage(canvas)}
+            onClick={() => downloadAsImage()}
           >
             Save as image
           </div>
